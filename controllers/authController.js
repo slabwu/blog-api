@@ -1,6 +1,25 @@
 import passport from 'passport'
-import { validPassword, genPassword, issueJWT } from '../lib/utils.js'
+import { validatePassword, genPassword, issueJWT, validateJWT } from '../lib/utils.js'
 import { prisma } from '../lib/prisma.js'
+
+export const auth = passport.authenticate('jwt', {session: false})
+
+export async function getUser(req, res, next) {
+    const authHeader = req.headers.authorization
+    if (!authHeader) return next()
+    
+    const token = authHeader.split(' ')[1]
+    try {
+        const userId = validateJWT(token).sub
+        req.user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        })
+    } catch (err) {
+    }
+    next()
+}
 
 async function postLogIn(req, res) {
     const user = await prisma.user.findUnique({
@@ -10,7 +29,7 @@ async function postLogIn(req, res) {
     })
 
     if (!user) return res.status(401).json({ success: false, msg: "Could not find user" })
-    const isValid = validPassword(req.body.password, user.hash, user.salt)
+    const isValid = validatePassword(req.body.password, user.hash, user.salt)
 
     if (isValid) {
         const tokenObject = issueJWT(user)
@@ -46,4 +65,3 @@ const authController = {
 }
 
 export default authController
-export const auth = passport.authenticate('jwt', {session: false})
