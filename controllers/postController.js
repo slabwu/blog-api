@@ -1,6 +1,8 @@
 import { prisma } from '../lib/prisma.js'
 
 async function post(req, res) {
+    if (req.user.role !== 'ADMIN') return res.status(401)
+    
     const post = await prisma.post.create({
         data: { 
             title: req.body.title,
@@ -22,6 +24,8 @@ async function get(req, res) {
 }
 
 async function put(req, res) {
+    if (req.user.role !== 'ADMIN') return res.status(401)
+
     const postId = Number(req.params.postId)
     const post = await prisma.post.update({
         where: { 
@@ -37,6 +41,8 @@ async function put(req, res) {
 }
 
 async function patch(req, res) {
+    if (req.user.role !== 'ADMIN') return res.status(401)
+
     const postId = Number(req.params.postId)
     const post = await prisma.post.update({
         where: { 
@@ -50,6 +56,8 @@ async function patch(req, res) {
 }
 
 async function del(req, res) {
+    if (req.user.role !== 'ADMIN') return res.status(401)
+        
     const postId = Number(req.params.postId)
     await prisma.post.delete({
         where: { 

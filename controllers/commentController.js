@@ -14,6 +14,7 @@ async function post(req, res) {
 }
 
 async function get(req, res) {
+    console.log(req.user)
     const commentId = Number(req.params.commentId)
     const comment = await prisma.comment.findUnique({
         where: { 
@@ -25,6 +26,13 @@ async function get(req, res) {
 
 async function put(req, res) {
     const commentId = Number(req.params.commentId)
+    const userId = await prisma.comment.findUnique({
+        where: { 
+            id: commentId
+        }
+    }).userId
+    if (userId !== req.user.id && req.user.role !== 'ADMIN') return res.status(401)
+
     const comment = await prisma.comment.update({
         where: { 
             id: commentId
@@ -38,6 +46,13 @@ async function put(req, res) {
 
 async function del(req, res) {
     const commentId = Number(req.params.commentId)
+    const userId = await prisma.comment.findUnique({
+        where: { 
+            id: commentId
+        }
+    }).userId
+    if (userId !== req.user.id && req.user.role !== 'ADMIN') return res.status(401)
+    
     await prisma.comment.delete({
         where: { 
             id: commentId
