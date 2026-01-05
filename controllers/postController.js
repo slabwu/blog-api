@@ -36,6 +36,19 @@ async function put(req, res) {
     res.status(200).send(post)
 }
 
+async function patch(req, res) {
+    const postId = Number(req.params.postId)
+    const post = await prisma.post.update({
+        where: { 
+            id: postId
+        },
+        data: {
+            published: req.body.published,
+        }
+    })
+    res.status(200).send(post)
+}
+
 async function del(req, res) {
     const postId = Number(req.params.postId)
     await prisma.post.delete({
@@ -55,6 +68,7 @@ const postController = {
     post,
     get,
     put,
+    patch,
     del,
     getAll
 }
